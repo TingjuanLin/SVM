@@ -2,62 +2,22 @@ import streamlit as st
 import joblib
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt  # 移除了 shap 导入
-
-# 页面配置
-st.set_page_config(page_title="儿童高血压高尿酸血症预测模型", layout="wide")
-
-# 加载模型和数据
-@st.cache_resource
-def load_model():
-    model = joblib.load('svm_model.pkl')
-    return model
-
-@st.cache_resource
-def load_test_data():
-    X_test = pd.read_csv('X_test.csv')
-    y_test = pd.read_csv('y_test.csv')
-    return X_test, y_test
-
-try:
-    model = load_model()
-    X_test, y_test = load_test_data()
-    st.success("模型和数据加载成功！")
-except Exception as e:
-    st.error(f"加载模型或数据失败: {str(e)}")
-    st.stop()
-
-feature_names = ["bmi_z", "sex", "prealbumin", "crea", "age"]
-
-# 应用标题
-st.title("儿童高血压患者高尿酸血症预测模型")
-st.markdown("---")
-
-# 创建两列布局
-col1, col2 = st.columns([1, 1])
-
-with col1:
-    st.header("输入患者信息")
-    
-    # 输入年龄
-    Age = st.number_input('年龄 (6-17岁):', min_value=6, max_value=18, value=12)
-    age = (Age - 12.51221) / 2.235874
-    
-    # 输入性别
-    sex = st.selectbox("性别:", options=[0, 1], format_func=lambda x: "男童" if x == 0 else "女童")
-    
-    # 输入前白蛋白
-    Prealbumin = st.number_input('前白蛋白 (mg/L):', min_value=1, max_value=500, value=235)
-    prealbumin = (Prealbumin - 235.2251) / 43.65179
-    
-    # 输入肌酐
-    Crea = st.number_input("肌酐 (μmol/L):", min_value=1, max_value=120, value=53)
-    crea = (Crea - 53.54569) / 12.28562
-    
-    # 输入BMI
-    BMI = st.number_input("BMI (kg/m²):", min_value=10.0, max_value=40.0, value=18.0, step=0.1)
-
-# 定义LMS数据（保持不变）
+import shap
+import matplotlib.pyplot as plt
+model = joblib.load('svm_model.pkl')
+X_test = pd.read_csv ('X_test.csv')
+y_test = pd.read_csv ('y_test.csv')
+feature_names = ["bmi_z","sex","prealbumin","crea","age"]
+st.title ("Prediction Model for Hyperuricemia in Pediatric Hypertension")
+Age = st.number_input('Age (6-17 years):', min_value=6, max_value=18, value = 12)
+age = (Age-12.51221)/2.235874
+sex = st.selectbox("Sex:", options =[0, 1], format_func = lambda x:"Boys" if x==0 else "Girls")
+Prealbumin = st.number_input('Prealbumin (mg/L):', min_value=1, max_value=500, value = 41)
+prealbumin = (Prealbumin-235.2251)/43.65179
+Crea = st.number_input("Crea (μmol/L):", min_value = 1, max_value = 120, value = 41)
+crea = (Crea-53.54569)/12.28562
+BMI = st.number_input("BMI (kg/m^2):", min_value = 1, max_value = 100, value = 10)
+# 定义LMS数据
 boys_data = pd.DataFrame({
     'age': [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 
             10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0],
@@ -92,6 +52,15 @@ lms_data = {'boys': boys_data, 'girls': girls_data}
 def calculate_bmi_zscore(age, bmi, sex, lms_data):
     """
     计算BMI Z-score的函数
+    
+    参数:
+    age: 年龄 (年)
+    bmi: BMI值
+    sex: 性别 (1=男童, 2=女童)
+    lms_data: 包含男女童LMS数据的字典
+    
+    返回:
+    z_score: BMI Z-score
     """
     # 根据性别选择对应的LMS数据
     if sex == 0:  # 男童
@@ -99,6 +68,7 @@ def calculate_bmi_zscore(age, bmi, sex, lms_data):
     elif sex == 1:  # 女童
         data = lms_data['girls']
     else:
+        # 如果不是1或2，返回NaN
         return np.nan
     
     # 确保年龄是数值类型
@@ -108,6 +78,7 @@ def calculate_bmi_zscore(age, bmi, sex, lms_data):
         return np.nan
     
     # 找到对应年龄的索引
+    # 由于年龄可能是小数，使用最接近的匹配
     age_idx = None
     min_diff = float('inf')
     
@@ -117,6 +88,7 @@ def calculate_bmi_zscore(age, bmi, sex, lms_data):
             min_diff = diff
             age_idx = i
     
+    # 如果年龄超出范围，返回NaN
     if age_idx is None:
         return np.nan
     
@@ -125,70 +97,36 @@ def calculate_bmi_zscore(age, bmi, sex, lms_data):
     M = data.loc[age_idx, 'M']
     S = data.loc[age_idx, 'S']
     
-    # 计算Z-score
+    # 计算Z-score (根据LMS方法)
     try:
+        # 处理L接近0的情况
         if abs(L) < 1e-10:
+            # 当L接近0时，使用极限形式
             z_score = (np.log(bmi / M)) / S
         else:
             z_score = ((bmi / M) ** L - 1) / (L * S)
     except:
+        # 计算错误时返回NaN
         z_score = np.nan
     
     return z_score
-
-# 计算BMI Z分数
 bmi_z = calculate_bmi_zscore(Age, BMI, sex, lms_data)
+feature_values = [bmi_z, sex, prealbumin, crea, age]
+features = np.array([feature_values])
+if st.button('Predict'):
+    predict_class = svm_model.predict(features)[1]
+    predict_proba = svm_model.predict_proba (features)[1]
+    st.write(f"**Predicted Class:** {predict_class} (1:Hyperuricemia, 0:No hyperuricemia)")
+    st.write(f"**Predicted Probabilities:** {predict_proba}"  )
+    st.subheader ("SHAP Waterfall Plot Explanation")
+    explainer = shap.KernelExplainer(svm_model)
+    shap_values = explainer.shap_values(pd.DataFrame([feature_values], columns=feature_names))
+    if predicted_class == 1:
+        shap.waterfall_plot(explainer.shap_values[1],shape_values[:,:,1],pd.DataFrame([feature_values], columns=feature_names),matplotlib=True)
+    else:
+        shap.waterfall_plot(explainer.shap_values[0],shape_values[:,:,0],pd.DataFrame([feature_values], columns=feature_names),matplotlib=True)
 
-with col2:
-    st.header("输入特征汇总")
-    
-    # 显示计算后的特征值
-    feature_values = [bmi_z, sex, prealbumin, crea, age]
-    features = np.array([feature_values])
-    
-    # 创建特征值显示表
-    feature_df = pd.DataFrame({
-        '特征': ['BMI Z分数', '性别', '前白蛋白(标准化)', '肌酐(标准化)', '年龄(标准化)'],
-        '原始值': [f"{BMI:.1f} kg/m²", "男童" if sex == 0 else "女童", f"{Prealbumin} mg/L", f"{Crea} μmol/L", f"{Age} 岁"],
-        '标准化值': [f"{bmi_z:.4f}", f"{sex}", f"{prealbumin:.4f}", f"{crea:.4f}", f"{age:.4f}"]
-    })
-    
-    st.table(feature_df)
-    
-    st.info(f"**BMI Z分数计算结果**: {bmi_z:.4f}")
+    plt.savefig("shap_waterfall_plot.png", bbox_inches = "tight", dpi=300)
+    st.image("shap_waterfall_plot.png", caption = 'SHAP Waterfall Plot Explanation')
 
-# 预测按钮和结果
-st.markdown("---")
-st.header("模型预测")
-
-if st.button('开始预测', type="primary"):
-    with st.spinner('正在进行预测计算...'):
-        try:
-            # 进行预测
-            predict_class = model.predict(features)[0]
-            
-            # 获取预测概率
-            if hasattr(model, 'predict_proba'):
-                predict_proba = model.predict_proba(features)[0]
-                prob_positive = predict_proba[1]  # 高尿酸血症的概率
-            else:
-                prob_positive = None
-            
-            # 显示结果
-            st.success("预测完成！")
-            
-            col_result1, col_result2 = st.columns(2)
-            
-            with col_result1:
-                st.subheader("预测结果")
-                if predict_class == 1:
-                    st.error(f"**预测类别**: 高尿酸血症风险较高")
-                else:
-                    st.success(f"**预测类别**: 高尿酸血症风险较低")
-                
-                if prob_positive is not None:
-                    st.info(f"**高尿酸血症概率**: {prob_positive:.2%}")
-            
-        except Exception as e:
-            st.error(f"预测过程中发生错误: {str(e)}")
 
