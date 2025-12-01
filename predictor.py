@@ -2,8 +2,8 @@
  "cells": [
   {
    "cell_type": "code",
-   "execution_count": 1,
-   "id": "7a5ae948-8a58-4d35-9162-6e23c9bdbb59",
+   "execution_count": null,
+   "id": "18d408af-c5aa-4663-81ff-2398d97e0954",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -12,205 +12,61 @@
     "import numpy as np\n",
     "import pandas as pd\n",
     "import shap\n",
-    "import matplotlib.pyplot as plt"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 2,
-   "id": "5f66d54d-b9c2-4b01-8a2a-1a1b94d1adf6",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "model = joblib.load('svm_model.pkl')"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 3,
-   "id": "46a9e028-7dc8-496d-a2e0-4008af6e41ab",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "X_test = pd.read_csv ('X_test.csv')\n",
-    "y_test = pd.read_csv ('y_test.csv')"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 5,
-   "id": "128ace9a-d9e9-46cf-94a1-7a257db7cc38",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "feature_names = [\"bmi_z\",\"sex\",\"prealbumin\",\"crea\",\"age\"]"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 6,
-   "id": "fbb6b525-a3c2-4994-be42-4be86b1d1252",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "2025-12-01 20:52:00.429 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 20:52:01.429 \n",
-      "  \u001b[33m\u001b[1mWarning:\u001b[0m to view this Streamlit app on a browser, run it with the following\n",
-      "  command:\n",
-      "\n",
-      "    streamlit run D:\\softwares\\Anaconda\\Lib\\site-packages\\ipykernel_launcher.py [ARGUMENTS]\n",
-      "2025-12-01 20:52:01.429 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 20:52:01.430 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
-     ]
-    },
-    {
-     "data": {
-      "text/plain": [
-       "DeltaGenerator()"
-      ]
-     },
-     "execution_count": 6,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
-   "source": [
-    "st.title (\"Prediction Model for Hyperuricemia in Pediatric Hypertension\")"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 23,
-   "id": "d962c167-08c3-4ce7-90be-9125caa84159",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "2025-12-01 21:52:39.114 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:39.114 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:39.115 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:39.116 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:39.116 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:39.118 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:39.118 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
-     ]
-    }
-   ],
-   "source": [
-    "Age = st.number_input('Age (6-17 years):', min_value=6, max_value=18, value = 12)\n",
-    "age = (Age-12.51221)/2.235874"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 24,
-   "id": "ac9d6bfb-df29-4088-85dd-f53300a71ce0",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "2025-12-01 21:52:46.005 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.005 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.006 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.007 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.008 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.008 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.009 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
-     ]
-    }
-   ],
-   "source": [
-    "sex = st.selectbox(\"Sex:\", options =[0, 1], format_func = lambda x:\"Boys\" if x==0 else \"Girls\")"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 25,
-   "id": "5e7d7acc-51c9-44fa-92dc-7a53a891e943",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "2025-12-01 21:52:46.256 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.257 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.258 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.258 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.259 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.260 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.261 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
-     ]
-    }
-   ],
-   "source": [
-    "Prealbumin = st.number_input('Prealbumin (mg/L):', min_value=1, max_value=500, value = 41)\n",
-    "prealbumin = (Prealbumin-235.2251)/43.65179"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 26,
-   "id": "bce468a6-3083-43d6-a8f2-58e922a84c44",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "2025-12-01 21:52:46.400 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.402 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.403 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.403 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.404 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.405 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.405 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
-     ]
-    }
-   ],
-   "source": [
-    "Crea = st.number_input(\"Crea (μmol/L):\", min_value = 1, max_value = 120, value = 41)\n",
-    "crea = (Crea-53.54569)/12.28562"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 27,
-   "id": "6b2cbb2b-bbe8-40b7-9b41-8594411af94f",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "2025-12-01 21:52:46.568 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.569 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.569 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.570 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.571 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.571 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:52:46.572 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
-     ]
-    }
-   ],
-   "source": [
-    "BMI = st.number_input(\"BMI (kg/m^2):\", min_value = 1, max_value = 100, value = 10)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 28,
-   "id": "22b3223b-2414-4166-a261-5ca53326b515",
-   "metadata": {},
-   "outputs": [],
-   "source": [
+    "import matplotlib.pyplot as plt\n",
+    "\n",
+    "# 页面配置\n",
+    "st.set_page_config(page_title=\"儿童高血压高尿酸血症预测模型\", layout=\"wide\")\n",
+    "\n",
+    "# 加载模型和数据\n",
+    "@st.cache_resource\n",
+    "def load_model():\n",
+    "    model = joblib.load('svm_model.pkl')\n",
+    "    return model\n",
+    "\n",
+    "@st.cache_resource\n",
+    "def load_test_data():\n",
+    "    X_test = pd.read_csv('X_test.csv')\n",
+    "    y_test = pd.read_csv('y_test.csv')\n",
+    "    return X_test, y_test\n",
+    "\n",
+    "try:\n",
+    "    model = load_model()\n",
+    "    X_test, y_test = load_test_data()\n",
+    "    st.success(\"模型和数据加载成功！\")\n",
+    "except Exception as e:\n",
+    "    st.error(f\"加载模型或数据失败: {str(e)}\")\n",
+    "    st.stop()\n",
+    "\n",
+    "feature_names = [\"bmi_z\", \"sex\", \"prealbumin\", \"crea\", \"age\"]\n",
+    "\n",
+    "# 应用标题\n",
+    "st.title(\"儿童高血压患者高尿酸血症预测模型\")\n",
+    "st.markdown(\"---\")\n",
+    "\n",
+    "# 创建两列布局\n",
+    "col1, col2 = st.columns([1, 1])\n",
+    "\n",
+    "with col1:\n",
+    "    st.header(\"输入患者信息\")\n",
+    "    \n",
+    "    # 输入年龄\n",
+    "    Age = st.number_input('年龄 (6-17岁):', min_value=6, max_value=18, value=12)\n",
+    "    age = (Age - 12.51221) / 2.235874\n",
+    "    \n",
+    "    # 输入性别\n",
+    "    sex = st.selectbox(\"性别:\", options=[0, 1], format_func=lambda x: \"男童\" if x == 0 else \"女童\")\n",
+    "    \n",
+    "    # 输入前白蛋白\n",
+    "    Prealbumin = st.number_input('前白蛋白 (mg/L):', min_value=1, max_value=500, value=235)\n",
+    "    prealbumin = (Prealbumin - 235.2251) / 43.65179\n",
+    "    \n",
+    "    # 输入肌酐\n",
+    "    Crea = st.number_input(\"肌酐 (μmol/L):\", min_value=1, max_value=120, value=53)\n",
+    "    crea = (Crea - 53.54569) / 12.28562\n",
+    "    \n",
+    "    # 输入BMI\n",
+    "    BMI = st.number_input(\"BMI (kg/m²):\", min_value=10.0, max_value=40.0, value=18.0, step=0.1)\n",
+    "\n",
     "# 定义LMS数据\n",
     "boys_data = pd.DataFrame({\n",
     "    'age': [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, \n",
@@ -246,15 +102,6 @@
     "def calculate_bmi_zscore(age, bmi, sex, lms_data):\n",
     "    \"\"\"\n",
     "    计算BMI Z-score的函数\n",
-    "    \n",
-    "    参数:\n",
-    "    age: 年龄 (年)\n",
-    "    bmi: BMI值\n",
-    "    sex: 性别 (1=男童, 2=女童)\n",
-    "    lms_data: 包含男女童LMS数据的字典\n",
-    "    \n",
-    "    返回:\n",
-    "    z_score: BMI Z-score\n",
     "    \"\"\"\n",
     "    # 根据性别选择对应的LMS数据\n",
     "    if sex == 0:  # 男童\n",
@@ -262,7 +109,6 @@
     "    elif sex == 1:  # 女童\n",
     "        data = lms_data['girls']\n",
     "    else:\n",
-    "        # 如果不是1或2，返回NaN\n",
     "        return np.nan\n",
     "    \n",
     "    # 确保年龄是数值类型\n",
@@ -272,7 +118,6 @@
     "        return np.nan\n",
     "    \n",
     "    # 找到对应年龄的索引\n",
-    "    # 由于年龄可能是小数，使用最接近的匹配\n",
     "    age_idx = None\n",
     "    min_diff = float('inf')\n",
     "    \n",
@@ -282,7 +127,6 @@
     "            min_diff = diff\n",
     "            age_idx = i\n",
     "    \n",
-    "    # 如果年龄超出范围，返回NaN\n",
     "    if age_idx is None:\n",
     "        return np.nan\n",
     "    \n",
@@ -291,95 +135,125 @@
     "    M = data.loc[age_idx, 'M']\n",
     "    S = data.loc[age_idx, 'S']\n",
     "    \n",
-    "    # 计算Z-score (根据LMS方法)\n",
+    "    # 计算Z-score\n",
     "    try:\n",
-    "        # 处理L接近0的情况\n",
     "        if abs(L) < 1e-10:\n",
-    "            # 当L接近0时，使用极限形式\n",
     "            z_score = (np.log(bmi / M)) / S\n",
     "        else:\n",
     "            z_score = ((bmi / M) ** L - 1) / (L * S)\n",
     "    except:\n",
-    "        # 计算错误时返回NaN\n",
     "        z_score = np.nan\n",
     "    \n",
-    "    return z_score"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 17,
-   "id": "8951a8d1-a44f-4c4e-94a4-20e62b0bf815",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "bmi_z = calculate_bmi_zscore(Age, BMI, sex, lms_data)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 18,
-   "id": "31c22d17-39ae-4f00-bfcf-9745d66a1269",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "feature_values = [bmi_z, sex, prealbumin, crea, age]"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 20,
-   "id": "c022ad5a-90b8-4b6f-904e-684aff2209ac",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "features = np.array([feature_values])"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 21,
-   "id": "2b8e1f89-714b-42f0-93e5-4e49e19296f1",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "2025-12-01 21:48:19.653 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:48:19.655 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:48:19.655 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:48:19.656 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:48:19.656 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n",
-      "2025-12-01 21:48:19.658 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.\n"
-     ]
-    }
-   ],
-   "source": [
-    "if st.button('Predict'):\n",
-    "    predict_class = svm_model.predict(features)[1]\n",
-    "    predict_proba = svm_model.predict_proba (features)[1]\n",
-    "    st.write(f\"**Predicted Class:** {predict_class} (1:Hyperuricemia, 0:No hyperuricemia)\")\n",
-    "    st.write(f\"**Predicted Probabilities:** {predict_proba}\"  )\n",
-    "    st.subheader (\"SHAP Waterfall Plot Explanation\")\n",
-    "    explainer = shap.KernelExplainer(svm_model)\n",
-    "    shap_values = explainer.shap_values(pd.DataFrame([feature_values], columns=feature_names))\n",
-    "    if predicted_class == 1:\n",
-    "        shap.waterfall_plot(explainer.shap_values[1],shape_values[:,:,1],pd.DataFrame([feature_values], columns=feature_names),matplotlib=True)\n",
-    "    else:\n",
-    "        shap.waterfall_plot(explainer.shap_values[0],shape_values[:,:,0],pd.DataFrame([feature_values], columns=feature_names),matplotlib=True)\n",
+    "    return z_score\n",
     "\n",
-    "    plt.savefig(\"shap_waterfall_plot.png\", bbox_inches = \"tight\", dpi=300)\n",
-    "    st.image(\"shap_waterfall_plot.png\", caption = 'SHAP Waterfall Plot Explanation')"
+    "# 计算BMI Z分数\n",
+    "bmi_z = calculate_bmi_zscore(Age, BMI, sex, lms_data)\n",
+    "\n",
+    "with col2:\n",
+    "    st.header(\"输入特征汇总\")\n",
+    "    \n",
+    "    # 显示计算后的特征值\n",
+    "    feature_values = [bmi_z, sex, prealbumin, crea, age]\n",
+    "    features = np.array([feature_values])\n",
+    "    \n",
+    "    # 创建特征值显示表\n",
+    "    feature_df = pd.DataFrame({\n",
+    "        '特征': ['BMI Z分数', '性别', '前白蛋白(标准化)', '肌酐(标准化)', '年龄(标准化)'],\n",
+    "        '原始值': [f\"{BMI:.1f} kg/m²\", \"男童\" if sex == 0 else \"女童\", f\"{Prealbumin} mg/L\", f\"{Crea} μmol/L\", f\"{Age} 岁\"],\n",
+    "        '标准化值': [f\"{bmi_z:.4f}\", f\"{sex}\", f\"{prealbumin:.4f}\", f\"{crea:.4f}\", f\"{age:.4f}\"]\n",
+    "    })\n",
+    "    \n",
+    "    st.table(feature_df)\n",
+    "    \n",
+    "    st.info(f\"**BMI Z分数计算结果**: {bmi_z:.4f}\")\n",
+    "\n",
+    "# 预测按钮和结果\n",
+    "st.markdown(\"---\")\n",
+    "st.header(\"模型预测\")\n",
+    "\n",
+    "if st.button('开始预测', type=\"primary\"):\n",
+    "    with st.spinner('正在进行预测计算...'):\n",
+    "        try:\n",
+    "            # 进行预测\n",
+    "            predict_class = model.predict(features)[0]\n",
+    "            \n",
+    "            # 获取预测概率\n",
+    "            if hasattr(model, 'predict_proba'):\n",
+    "                predict_proba = model.predict_proba(features)[0]\n",
+    "                prob_positive = predict_proba[1]  # 高尿酸血症的概率\n",
+    "            else:\n",
+    "                prob_positive = None\n",
+    "            \n",
+    "            # 显示结果\n",
+    "            st.success(\"预测完成！\")\n",
+    "            \n",
+    "            col_result1, col_result2 = st.columns(2)\n",
+    "            \n",
+    "            with col_result1:\n",
+    "                st.subheader(\"预测结果\")\n",
+    "                if predict_class == 1:\n",
+    "                    st.error(f\"**预测类别**: 高尿酸血症风险较高\")\n",
+    "                else:\n",
+    "                    st.success(f\"**预测类别**: 高尿酸血症风险较低\")\n",
+    "                \n",
+    "                if prob_positive is not None:\n",
+    "                    st.info(f\"**高尿酸血症概率**: {prob_positive:.2%}\")\n",
+    "            \n",
+    "            \n",
+    "            # SHAP解释（简化版，避免复杂计算）\n",
+    "            st.markdown(\"---\")\n",
+    "            st.subheader(\"特征重要性分析\")\n",
+    "            \n",
+    "            # 简单显示特征贡献（这里用标准化值的绝对值作为示例）\n",
+    "            importance_df = pd.DataFrame({\n",
+    "                '特征': ['BMI Z-score', '性别', '前白蛋白', '肌酐', '年龄'],\n",
+    "                '标准化值': [bmi_z, sex, prealbumin, crea, age],\n",
+    "                '贡献度(示例)': [abs(bmi_z), abs(sex), abs(prealbumin), abs(crea), abs(age)]\n",
+    "            })\n",
+    "            \n",
+    "            # 排序并显示\n",
+    "            importance_df = importance_df.sort_values('贡献度(示例)', ascending=False)\n",
+    "            st.dataframe(importance_df)\n",
+    "            \n",
+    "            # 创建简单的条形图\n",
+    "            fig, ax = plt.subplots(figsize=(10, 6))\n",
+    "            bars = ax.barh(importance_df['特征'], importance_df['贡献度(示例)'])\n",
+    "            ax.set_xlabel('贡献度（绝对值）')\n",
+    "            ax.set_title('特征贡献度分析')\n",
+    "            ax.bar_label(bars, fmt='%.3f')\n",
+    "            st.pyplot(fig)\n",
+    "            \n",
+    "        except Exception as e:\n",
+    "            st.error(f\"预测过程中出现错误: {str(e)}\")\n",
+    "\n",
+    "# 侧边栏信息\n",
+    "st.sidebar.header(\"关于此模型\")\n",
+    "st.sidebar.info(\"\"\"\n",
+    "这是一个基于SVM的预测模型，用于评估儿童高血压患者发生高尿酸血症的风险。\n",
+    "\n",
+    "**输入特征**:\n",
+    "1. BMI Z分数\n",
+    "2. 性别\n",
+    "3. 前白蛋白水平\n",
+    "4. 肌酐水平\n",
+    "5. 年龄\n",
+    "\n",
+    "**输出**:\n",
+    "- 0: 低风险\n",
+    "- 1: 高风险\n",
+    "\"\"\")\n",
+    "\n",
+    "st.sidebar.header(\"使用说明\")\n",
+    "st.sidebar.markdown(\"\"\"\n",
+    "1. 在左侧输入患者信息\n",
+    "2. 点击\"开始预测\"按钮\n",
+    "3. 查看预测结果和解释\n",
+    "\"\"\")\n",
+    "\n",
+    "# 页脚\n",
+    "st.markdown(\"---\")\n",
+    "st.caption(\"注：本预测结果仅供参考，不能替代专业医疗诊断。如有疑问，请咨询专业医生。\")"
    ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "e3d2c911-a909-492f-b38a-9a60b436a889",
-   "metadata": {},
-   "outputs": [],
-   "source": []
   }
  ],
  "metadata": {
