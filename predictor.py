@@ -118,15 +118,6 @@ if st.button('Predict'):
     predict_proba = svm_model.predict_proba (features)[1]
     st.write(f"**Predicted Class:** {predict_class} (1:Hyperuricemia, 0:No hyperuricemia)")
     st.write(f"**Predicted Probabilities:** {predict_proba}"  )
-    st.subheader ("SHAP Waterfall Plot Explanation")
-    explainer = shap.KernelExplainer(svm_model)
-    shap_values = explainer.shap_values(pd.DataFrame([feature_values], columns=feature_names))
-    if predicted_class == 1:
-        shap.waterfall_plot(explainer.shap_values[1],shape_values[:,:,1],pd.DataFrame([feature_values], columns=feature_names),matplotlib=True)
-    else:
-        shap.waterfall_plot(explainer.shap_values[0],shape_values[:,:,0],pd.DataFrame([feature_values], columns=feature_names),matplotlib=True)
 
-    plt.savefig("shap_waterfall_plot.png", bbox_inches = "tight", dpi=300)
-    st.image("shap_waterfall_plot.png", caption = 'SHAP Waterfall Plot Explanation')
 
 
