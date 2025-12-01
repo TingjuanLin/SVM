@@ -2,8 +2,7 @@ import streamlit as st
 import joblib
 import numpy as np
 import pandas as pd
-import shap
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # 移除了 shap 导入
 
 # 页面配置
 st.set_page_config(page_title="儿童高血压高尿酸血症预测模型", layout="wide")
@@ -58,7 +57,7 @@ with col1:
     # 输入BMI
     BMI = st.number_input("BMI (kg/m²):", min_value=10.0, max_value=40.0, value=18.0, step=0.1)
 
-# 定义LMS数据
+# 定义LMS数据（保持不变）
 boys_data = pd.DataFrame({
     'age': [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 
             10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0],
@@ -190,32 +189,6 @@ if st.button('开始预测', type="primary"):
                 if prob_positive is not None:
                     st.info(f"**高尿酸血症概率**: {prob_positive:.2%}")
             
-            
-            # SHAP解释（简化版，避免复杂计算）
-            st.markdown("---")
-            st.subheader("特征重要性分析")
-            
-            # 简单显示特征贡献（这里用标准化值的绝对值作为示例）
-            importance_df = pd.DataFrame({
-                '特征': ['BMI Z-score', '性别', '前白蛋白', '肌酐', '年龄'],
-                '标准化值': [bmi_z, sex, prealbumin, crea, age],
-                '贡献度(示例)': [abs(bmi_z), abs(sex), abs(prealbumin), abs(crea), abs(age)]
-            })
-            
-            # 排序并显示
-            importance_df = importance_df.sort_values('贡献度(示例)', ascending=False)
-            st.dataframe(importance_df)
-            
-            # 创建简单的条形图
-            fig, ax = plt.subplots(figsize=(10, 6))
-            bars = ax.barh(importance_df['特征'], importance_df['贡献度(示例)'])
-            ax.set_xlabel('贡献度（绝对值）')
-            ax.set_title('特征贡献度分析')
-            ax.bar_label(bars, fmt='%.3f')
-            st.pyplot(fig)
-            
-        except Exception as e:
-            st.error(f"预测过程中出现错误: {str(e)}")
 
 # 侧边栏信息
 st.sidebar.header("关于此模型")
