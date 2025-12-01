@@ -189,4 +189,6 @@ if st.button('开始预测', type="primary"):
                 if prob_positive is not None:
                     st.info(f"**高尿酸血症概率**: {prob_positive:.2%}")
             
+        except Exception as e:
+            st.error(f"预测过程中发生错误: {str(e)}")
 
