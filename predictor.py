@@ -122,7 +122,7 @@ if st.button('Predict'):
     st.write(f"**Predicted Class:** {predict_class} (1:Hyperuricemia, 0:No hyperuricemia)")
     st.write(f"**Predicted Probabilities:** {predict_proba[1]:.3f}"  )
     st.subheader ("SHAP Waterfall Plot Explanation")
-    explainer = shap.KernelExplainer(model.predict_proba, X_test.sample(100, random_state=42))
+    explainer = shap.KernelExplainer(model.predict_proba, X_test.sample(20, random_state=42))
     shap_values = explainer.shap_values(pd.DataFrame([feature_values], columns=feature_names))
     fig, ax = plt.subplots(figsize=(12, 8))
     shap_class_index = 1
@@ -136,4 +136,5 @@ if st.button('Predict'):
     plt.tight_layout()
         
         # 显示图表
+
     st.pyplot(fig)
