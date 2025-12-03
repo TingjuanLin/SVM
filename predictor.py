@@ -15,9 +15,9 @@ st.title ("Prediction Model for Hyperuricemia in Pediatric Hypertension")
 Age = st.number_input('Age (6-17 years):', min_value=6, max_value=18, value = 12)
 age = (Age-12.51221)/2.235874
 sex = st.selectbox("Sex:", options =[0, 1], format_func = lambda x:"Boys" if x==0 else "Girls")
-Prealbumin = st.number_input('Prealbumin (mg/L):', min_value=1, max_value=500, value = 41)
+Prealbumin = st.number_input('Prealbumin (mg/L):', min_value=1, max_value=1000, value = 41)
 prealbumin = (Prealbumin-235.2251)/43.65179
-Crea = st.number_input("Crea (μmol/L):", min_value = 1, max_value = 120, value = 41)
+Crea = st.number_input("Crea (μmol/L):", min_value = 1, max_value = 200, value = 41)
 crea = (Crea-53.54569)/12.28562
 BMI = st.number_input("BMI (kg/m^2):", min_value = 1, max_value = 100, value = 10)
 # 定义LMS数据
@@ -119,22 +119,15 @@ features = np.array([feature_values])
 if st.button('Predict'):
     predict_class = model.predict(features)[0]
     predict_proba = model.predict_proba (features)[0]
-    st.write(f"**Predicted Class:** {predict_class} (1:Hyperuricemia, 0:No hyperuricemia)")
-    st.write(f"**Predicted Probabilities:** {predict_proba[1]:.3f}"  )
-    st.subheader ("SHAP Waterfall Plot Explanation")
-    explainer = shap.KernelExplainer(model.predict_proba, X_test.sample(20, random_state=42))
-    shap_values = explainer.shap_values(pd.DataFrame([feature_values], columns=feature_names))
-    fig, ax = plt.subplots(figsize=(12, 8))
-    shap_class_index = 1
-            # 创建Explanation对象
-    explanation = shap.Explanation(
-        values=shap_values[0][:,1],  # 正类的SHAP值（第一个样本）
-        base_values=explainer.expected_value[1],  # 正类的基准值
-        data=feature_values,  # 特征的实际值
-        feature_names=feature_names)  # 特征名称)
-    shap.waterfall_plot(explanation, max_display=10, show=False)
-    plt.tight_layout()
-        
-        # 显示图表
+    # 优化显示结果 - 加大、加粗、加颜色
+    st.markdown(f"<h2 style='color: #1E88E5; font-weight: bold;'>Predicted Probabilities: {predict_proba[1]:.3f}</h2>", 
+                unsafe_allow_html=True)
+    
+    # 根据预测结果设置不同颜色
+    if predict_class == 1:
+        st.markdown(f"<h1 style='color: #D32F2F; font-weight: bold; font-size: 32px;'>Predicted Class: {predict_class} (Hyperuricemia)</h1>", 
+                    unsafe_allow_html=True)
+    else:
+        st.markdown(f"<h1 style='color: #388E3C; font-weight: bold; font-size: 32px;'>Predicted Class: {predict_class} (No hyperuricemia)</h1>", 
+                    unsafe_allow_html=True)
 
-    st.pyplot(fig)
